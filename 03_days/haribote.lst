@@ -1,29 +1,9 @@
-     1                                  ; haribote.nas - A simple kernel
+     1                                  ; haribote.nas - A simple kernel that does nothing
      2                                  
      3                                  [ORG 0x7E00]
      4                                  
-     5                                  ; メッセージを表示
-     6 00000000 B80000                  mov ax, 0x0000
-     7 00000003 8ED8                    mov ds, ax
-     8 00000005 BE[1900]                mov si, msg
-     9 00000008 E80200                  call print_string
-    10                                  
-    11                                  ; 無限ループで停止
-    12 0000000B EBFE                    jmp $
-    13                                  
-    14                                  print_string:
-    15 0000000D AC                          lodsb
-    16 0000000E 08C0                        or al, al
-    17 00000010 7406                        jz .done
-    18 00000012 B40E                        mov ah, 0x0E
-    19 00000014 CD10                        int 0x10
-    20 00000016 EBF5                        jmp print_string
-    21                                  .done:
-    22 00000018 C3                          ret
-    23                                  
-    24 00000019 48656C6C6F2066726F-     msg db 'Hello from kernel!', 0
-    24 00000022 6D206B65726E656C21-
-    24 0000002B 00                 
-    25                                  
-    26 0000002C 00<rept>                times 510-($-$$) db 0
-    27 000001FE 55AA                    dw 0xAA55
+     5                                  ; 無限ループで停止
+     6 00000000 EBFE                    jmp $
+     7                                  
+     8 00000002 00<rept>                times 510-($-$$) db 0
+     9 000001FE 55AA                    dw 0xAA55

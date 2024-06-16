@@ -1,0 +1,101 @@
+     1                                  ORG     0x7c00
+     2                                  
+     3                                  ;フロッピーディスクの詳細
+     4 00000000 EB4E                            JMP     entry
+     5 00000002 90                              DB      0x90
+     6 00000003 48415249424F5445                DB      "HARIBOTE"
+     7 0000000B 0002                            DW      512
+     8 0000000D 01                              DB      1
+     9 0000000E 0100                            DW      1
+    10 00000010 02                              DB      2
+    11 00000011 E000                            DW      224
+    12 00000013 400B                            DW      2880
+    13 00000015 F0                              DB      0xf0
+    14 00000016 0900                            DW      9
+    15 00000018 1200                            DW      18
+    16 0000001A 0200                            DW      2
+    17 0000001C 00000000                        DD      0
+    18 00000020 400B0000                        DD      2880
+    19                                  
+    20                                      ; FAT12/16におけるオフセット36以降のフィールド
+    21 00000024 000029                          DB      0,0,0x29
+    22 00000027 FFFFFFFF                        DD      0xffffffff
+    23 0000002B 48415249424F54454F-             DB      "HARIBOTEOS "
+    23 00000034 5320               
+    24 00000036 4641543132202020                DB      "FAT12   "
+    25 0000003E 00<rept>                        TIMES    18     DB 0
+    26                                  
+    27                                  ; START BS_BootCode 64(0x14)    448(0x1C0)
+    28                                  entry:
+    29 00000050 B80000                          MOV     AX, 0
+    30 00000053 8ED0                            MOV     SS, AX
+    31 00000055 BC007C                          MOV     SP, 0x7c00
+    32 00000058 8ED8                            MOV     DS, AX
+    33                                  
+    34                                          ;MOV     SI, msg
+    35                                  
+    36                                  ; load disk
+    37 0000005A B82008                          MOV     AX, 0x0820
+    38 0000005D 8EC0                            MOV     ES, AX
+    39 0000005F B500                            MOV     CH, 0
+    40 00000061 B600                            MOV     DH, 0
+    41 00000063 B102                            MOV     CL, 2
+    42                                  
+    43                                  readloop:
+    44 00000065 BE0000                          MOV     SI, 0
+    45                                  
+    46                                  retry:
+    47 00000068 B402                            MOV     AH, 0x02
+    48 0000006A B001                            MOV     AL, 1
+    49 0000006C BB0000                          MOV     BX, 0
+    50                                  
+    51 0000006F B200                            MOV     DL, 0x00
+    52 00000071 CD13                            INT     0x13
+    53 00000073 7310                            JNC     next
+    54                                  
+    55 00000075 83C601                          ADD     SI, 1
+    56 00000078 83FE05                          CMP     SI, 5
+    57 0000007B 7319                            JAE     error
+    58                                  
+    59 0000007D B400                            MOV     AH, 0x00
+    60 0000007F B200                            MOV     DL, 0x00
+    61 00000081 CD13                            INT     0x13
+    62 00000083 EBE3                            JMP     retry
+    63                                  
+    64                                  next:
+    65 00000085 8CC0                            MOV     AX, ES
+    66 00000087 83C020                          ADD     AX, 0x0020
+    67 0000008A 8EC0                            MOV     ES, AX
+    68 0000008C 80C101                          ADD     CL, 1
+    69 0000008F 80F912                          CMP     CL, 18
+    70 00000092 76D1                            JBE     readloop
+    71                                  
+    72                                  fin:
+    73                                          HTL
+    73          ******************       warning: label alone on a line without a colon might be in error [-w+orphan-labels]
+    74 00000094 EBFE                            JMP     fin
+    75                                  
+    76                                  error:
+    77 00000096 BE[AB00]                        MOV     SI, msg
+    78                                  
+    79                                  putloop:
+    80 00000099 8A04                            MOV     AL, [SI]
+    81 0000009B 83C601                          ADD     SI, 1
+    82 0000009E 3C00                            CMP     AL, 0
+    83 000000A0 74F2                            JE      fin
+    84                                  
+    85 000000A2 B40E                            MOV     AH, 0x0e
+    86 000000A4 BB0F00                          MOV     BX, 15
+    87 000000A7 CD10                            INT     0x10
+    88 000000A9 EBEE                            JMP     putloop
+    89                                  
+    90                                  msg:
+    91 000000AB 0A0A                            DB      0x0a, 0x0a
+    92 000000AD 6C6F6164206572726F-             DB      "load error"
+    92 000000B6 72                 
+    93 000000B7 0A                              DB      0x0a
+    94 000000B8 00                              DB      0
+    95                                  
+    96 000000B9 00<rept>                        TIMES   (0x7dfe - 0x7c00 - ($ - $$)) DB 0
+    97                                  
+    98 000001FE 55AA                            DB      0x55, 0xaa

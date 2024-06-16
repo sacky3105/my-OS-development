@@ -1,0 +1,80 @@
+     1                                  ORG     0x7c00
+     2                                  
+     3                                  ;フロッピーディスクの詳細
+     4 00000000 EB4D                            JMP     entry
+     5 00000002 90                              DB      0x90
+     6 00000003 48415249424F5445                DB      "HARIBOTE"
+     7 0000000B 0002                            DW      512
+     8 0000000D 01                              DB      1
+     9 0000000E 0100                            DW      1
+    10 00000010 02                              DB      2
+    11 00000011 E000                            DW      224
+    12 00000013 400B                            DW      2880
+    13 00000015 F0                              DB      0xf0
+    14 00000016 0900                            DW      9
+    15 00000018 1200                            DW      18
+    16 0000001A 0200                            DW      2
+    17 0000001C 00000000                        DD      0
+    18 00000020 400B0000                        DD      2880
+    19                                  
+    20                                      ; FAT12/16におけるオフセット36以降のフィールド
+    21 00000024 000029                          DB      0,0,0x29
+    22 00000027 FFFFFFFF                        DD      0xffffffff
+    23 0000002B 48415249424F54454F-             DB      "HARIBOTEOS"
+    23 00000034 53                 
+    24 00000035 4641543132202020                DB      "FAT12   "
+    25 0000003D 00<rept>                        TIMES    18     DB 0
+    26                                  
+    27                                  ; START BS_BootCode 64(0x14)    448(0x1C0)
+    28                                  entry:
+    29 0000004F B80000                          MOV     AX, 0
+    30 00000052 8ED0                            MOV     SS, AX
+    31 00000054 BC007C                          MOV     SP, 0x7c00
+    32 00000057 8ED8                            MOV     DS, AX
+    33                                          ;MOV     ES, AX
+    34                                  
+    35                                          ;MOV     SI, msg
+    36                                  
+    37                                  ; load disk
+    38 00000059 B82008                          MOV     AX, 0x0820
+    39 0000005C 8EC0                            MOV     ES, AX
+    40 0000005E B500                            MOV     CH, 0
+    41 00000060 B600                            MOV     DH, 0
+    42 00000062 B102                            MOV     CL, 2
+    43                                  
+    44 00000064 B402                            MOV     AH, 0x02
+    45 00000066 B001                            MOV     AL, 1
+    46 00000068 BB0000                          MOV     BX, 0
+    47 0000006B B200                            MOV     DL, 0x00
+    48 0000006D CD13                            INT     0x13
+    49 0000006F 7202                            JC      error
+    50                                  
+    51                                  fin:
+    52                                          HTL
+    52          ******************       warning: label alone on a line without a colon might be in error [-w+orphan-labels]
+    53 00000071 EBFE                            JMP     fin
+    54                                  
+    55                                  error:
+    56 00000073 BE[8800]                        MOV     SI, msg
+    57                                  
+    58                                  putloop:
+    59 00000076 8A04                            MOV     AL, [SI]
+    60 00000078 83C601                          ADD     SI, 1
+    61 0000007B 3C00                            CMP     AL, 0
+    62 0000007D 74F2                            JE      fin
+    63                                  
+    64 0000007F B40E                            MOV     AH, 0x0e
+    65 00000081 BB0F00                          MOV     BX, 15
+    66 00000084 CD10                            INT     0x10
+    67 00000086 EBEE                            JMP     putloop
+    68                                  
+    69                                  msg:
+    70 00000088 0A0A                            DB      0x0a, 0x0a
+    71 0000008A 6C6F6164206572726F-             DB      "load error"
+    71 00000093 72                 
+    72 00000094 0A                              DB      0x0a
+    73 00000095 00                              DB      0
+    74                                  
+    75 00000096 00<rept>                        TIMES   (0x7dfe - 0x7c00 - ($ - $$)) DB 0
+    76                                  
+    77 000001FE 55AA                            DB      0x55, 0xaa

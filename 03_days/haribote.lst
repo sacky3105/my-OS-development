@@ -1,9 +1,0 @@
-     1                                  ; haribote.nas - A simple kernel that does nothing
-     2                                  
-     3                                  [ORG 0x7E00]
-     4                                  
-     5                                  ; 無限ループで停止
-     6 00000000 EBFE                    jmp $
-     7                                  
-     8 00000002 00<rept>                times 510-($-$$) db 0
-     9 000001FE 55AA                    dw 0xAA55

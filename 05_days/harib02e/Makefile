@@ -2,7 +2,7 @@ default:
 	make img
 
 convHankakuTxt : convHankakuTxt.c
-	gcc convHankakuTxt.c -o convHankakuTxt
+	$(CC) $< -o $@
 
 hankaku.c : hankaku.txt convHankakuTxt
 	./convHankakuTxt

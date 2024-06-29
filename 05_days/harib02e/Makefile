@@ -17,7 +17,7 @@ nasmfunc.o: nasmfunc.asm Makefile
 	nasm -g -f elf nasmfunc.asm -o nasmfunc.o
 
 bootpack.hrb : bootpack.c har.ld hankaku.c nasmfunc.o Makefile
-	gcc -march=i486 -m32 -nostdlib -T har.ld bootpack.c hankaku.c nasmfunc.o -o bootpack.hrb
+	gcc -march=i486 -m32 -nostdlib -fno-pic -T har.ld bootpack.c hankaku.c nasmfunc.o -o bootpack.hrb
 
 haribote.sys: asmhead.bin bootpack.hrb Makefile
 	cat asmhead.bin bootpack.hrb > haribote.sys
